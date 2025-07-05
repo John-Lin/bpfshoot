@@ -22,7 +22,7 @@
 ### Docker
 
 ```bash
-docker run -it --rm --privileged --name bpfshoot John-Lin/bpfshoot:0.0.1
+docker run -it --rm --privileged --name bpfshoot johnlin/bpfshoot:latest
 ```
 
 ### Kubernetes
@@ -37,7 +37,7 @@ spec:
   hostPID: true
   containers:
   - name: bpfshoot
-    image: John-Lin/bpfshoot:0.0.1
+    image: johnlin/bpfshoot:latest
     stdin: true
     tty: true
     securityContext:

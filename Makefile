@@ -1,7 +1,7 @@
 .PHONY: build-x86 build-arm64 push all
 
 # Build Vars
-IMAGENAME=John-Lin/bpfshoot
+IMAGENAME=johnlin/bpfshoot
 VERSION=0.0.1
 
 
