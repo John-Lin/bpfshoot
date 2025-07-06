@@ -55,8 +55,30 @@ make build-all
 # Build and push to registry
 make all
 
-# Create and push a release tag
+# Create and push a release tag (VERSION defaults to 0.0.1, can be overridden)
 make release VERSION=0.0.2
+
+# Just build with custom version
+make build-all VERSION=0.0.3
+```
+
+### Local Development and Testing
+```bash
+# Test locally built images
+docker run -it --rm --privileged --pid=host --name bpfshoot-test \
+  -v /sys/kernel/debug:/sys/kernel/debug \
+  johnlin/bpfshoot:0.0.1
+
+# Test BCC version
+docker run -it --rm --privileged --pid=host --name bpfshoot-test \
+  -v /lib/modules:/lib/modules:ro \
+  -v /sys:/sys:ro \
+  -v /usr/src:/usr/src:ro \
+  johnlin/bpfshoot:0.0.1
+
+# For macOS development - start Lima VM and connect
+limactl start --name linux-vm lima/linux-vm.yaml
+limactl shell linux-vm
 ```
 
 ### Running the Container
@@ -89,19 +111,25 @@ tcpconnect-bpfcc   # Trace TCP connections
 
 ## GitHub Actions CI/CD
 
-The repository includes automated workflows that:
-- Build both Dockerfile variants (libbpf CO-RE and BCC) 
+The repository includes automated workflows (`.github/workflows/docker-build.yml`) that:
+- Build both Dockerfile variants (libbpf CO-RE and BCC) in parallel using matrix strategy
 - Build multi-architecture Docker images (linux/amd64, linux/arm64)
 - Automatically tag images with appropriate suffixes (`latest` and `latest-bcc`)
 - Push to Docker Hub on main branch commits and tags
 - Generate build attestations for security
+- Use GitHub Actions cache for faster builds
 
-Image tagging strategy:
+**Triggers:**
+- Push to main branch when Dockerfile or Dockerfile.bcc changes
+- Git tags starting with 'v' (e.g., v0.0.2)
+- Pull requests for testing (build only, no push)
+
+**Image tagging strategy:**
 - `johnlin/bpfshoot:latest` - libbpf CO-RE version from Dockerfile
 - `johnlin/bpfshoot:latest-bcc` - BCC version from Dockerfile.bcc
 - Additional tags for branches, PRs, semver, and SHA
 
-Required secrets in GitHub repository:
+**Required secrets in GitHub repository:**
 - `DOCKER_USERNAME`: johnlin
 - `DOCKER_PASSWORD`: Docker Hub access token
 
@@ -115,6 +143,12 @@ Required secrets in GitHub repository:
 - Container hostnames: `bpfshoot` (CO-RE) and `bcc-tools` (BCC)
 - Current version is defined in Makefile as VERSION=0.0.1 (overridable with make command)
 - Workflow builds both variants automatically on Dockerfile changes
+
+**Key Build Components:**
+- `Dockerfile`: libbpf CO-RE version - builds BCC v0.35.0 libbpf-tools from source on Debian Bookworm
+- `Dockerfile.bcc`: BCC version - installs pre-packaged bpfcc-tools on Debian Trixie
+- `Makefile`: Handles multi-arch builds, versioning, and release process
+- `.github/workflows/docker-build.yml`: Automated CI/CD for both variants
 
 ## Local Development Environment
 

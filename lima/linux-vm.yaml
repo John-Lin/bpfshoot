@@ -3,8 +3,9 @@ minimumLimaVersion: 1.1.0
 # For install x86_64 architecture on Apple Silicon, you need to install additional guest agents.
 # brew install lima-additional-guestagents
 
+# limactl start --name linux-vm linux-vm.yaml
+# or for x86_64 architecture on Apple Silicon:
 # limactl start --arch x86_64 --name linux-vm-x86 linux-vm.yaml
-# limactl start --arch aarch64 --name linux-vm linux-vm.yaml
 base:
 - template://docker
 

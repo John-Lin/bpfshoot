@@ -12,10 +12,9 @@ brew install lima-additional-guestagents
 
 ### Start the VM
 ```bash
-# For ARM64 (Apple Silicon)
-limactl start --arch aarch64 --name linux-vm lima/linux-vm.yaml
+limactl start --name linux-vm lima/linux-vm.yaml
 
-# For x86_64 (Intel or emulated)
+# For creating a vm with x86_64
 limactl start --arch x86_64 --name linux-vm-x86 lima/linux-vm.yaml
 ```
 
@@ -24,7 +23,7 @@ limactl start --arch x86_64 --name linux-vm-x86 lima/linux-vm.yaml
 limactl shell linux-vm
 ```
 
-### Run bpfshoot
+### Run bpfshoot inside the VM
 ```bash
 docker run -it --rm --privileged --pid=host --name bpfshoot \
   -v /sys/kernel/debug:/sys/kernel/debug \
