@@ -9,7 +9,6 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: johnlin/bpfshoot
 
 jobs:
   build:
@@ -19,6 +18,16 @@ jobs:
       packages: write
       id-token: write
       attestations: write
+    
+    strategy:
+      matrix:
+        include:
+          - dockerfile: Dockerfile
+            image_name: johnlin/bpfshoot
+            image_suffix: ""
+          - dockerfile: Dockerfile.bcc
+            image_name: johnlin/bpfshoot
+            image_suffix: "-bcc"
     
     steps:
     - name: Checkout repository
@@ -39,32 +48,32 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/${{ matrix.image_name }}
         tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix=sha-,format=short
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=ref,event=branch,suffix=${{ matrix.image_suffix }}
+          type=ref,event=pr,suffix=${{ matrix.image_suffix }}
+          type=semver,pattern={{version}},suffix=${{ matrix.image_suffix }}
+          type=semver,pattern={{major}}.{{minor}},suffix=${{ matrix.image_suffix }}
+          type=sha,prefix=sha-,format=short,suffix=${{ matrix.image_suffix }}
+          type=raw,value=latest${{ matrix.image_suffix }},enable={{is_default_branch}}
 
     - name: Build and push Docker image
       id: build
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./Dockerfile
+        file: ./${{ matrix.dockerfile }}
         platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=gha,scope=${{ matrix.dockerfile }}
+        cache-to: type=gha,mode=max,scope=${{ matrix.dockerfile }}
 
     - name: Generate artifact attestation
       if: github.event_name != 'pull_request'
       uses: actions/attest-build-provenance@v1
       with:
-        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        subject-name: ${{ env.REGISTRY }}/${{ matrix.image_name }}
         subject-digest: ${{ steps.build.outputs.digest }}
         push-to-registry: true

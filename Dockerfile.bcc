@@ -1,0 +1,29 @@
+FROM debian:sid
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    curl \
+    ca-certificates \
+    git \
+    jq \
+    procps \
+    net-tools \
+    iproute2 \
+    vim \
+    python3-pip \
+    apt-transport-https
+    bpfcc-tools \
+    libbpfcc \
+    libbpfcc-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# dnslib and cachetools are required for some BCC tools
+RUN pip3 install dnslib cachetools --break-system-packages
+
+# Setting User and Home
+USER root
+WORKDIR /root
+ENV HOSTNAME=bcc-tools
+
+# Running bash
+CMD ["bash"]
