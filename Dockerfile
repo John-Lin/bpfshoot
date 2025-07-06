@@ -4,8 +4,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
     ca-certificates \
-    pbuilder \
-    aptitude \
     git \
     jq \
     procps \
