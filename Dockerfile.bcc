@@ -1,4 +1,4 @@
-FROM debian:sid
+FROM debian:trixie
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     python3-pip \
     apt-transport-https
+
+RUN apt-get install -y --no-install-recommends \
     bpfcc-tools \
     libbpfcc \
     libbpfcc-dev \
