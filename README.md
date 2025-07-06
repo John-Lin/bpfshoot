@@ -46,38 +46,9 @@ spec:
 
 ## Included BPF Tools
 
-### Process & System Monitoring
-- **execsnoop** - Trace process execution
-- **opensnoop** - Trace file opens
-- **statsnoop** - Trace file stats
-- **syncsnoop** - Trace sync() calls
-- **killsnoop** - Trace kill() signals
+This container includes the complete set of BPF tools from the BCC project. For detailed tool descriptions and usage examples, please refer to the [BCC Tools documentation](https://github.com/iovisor/bcc?tab=readme-ov-file#tools).
 
-### Network Analysis
-- **tcpconnect** - Trace TCP connections
-- **tcpaccept** - Trace TCP accepts
-- **tcpretrans** - Trace TCP retransmissions
-- **tcplife** - Trace TCP session lifespans
-- **sockmap** - Trace socket map operations
-
-### Storage & I/O
-- **biosnoop** - Trace block I/O
-- **biolatency** - Block I/O latency histograms
-- **biotop** - Top for block I/O
-- **filetop** - Top for file reads/writes
-- **vfsstat** - VFS statistics
-
-### Memory & CPU
-- **memleak** - Trace memory leaks
-- **cpudist** - CPU usage distribution
-- **profile** - CPU profiling
-- **offcputime** - Off-CPU time profiling
-
-### Kernel Tracing
-- **trace** - Trace kernel functions
-- **argdist** - Argument distribution
-- **funccount** - Count kernel function calls
-- **stackcount** - Count stack traces
+All tools are pre-compiled and installed in the system PATH, ready to use directly from the command line.
 
 
 ## Building from Source
