@@ -2,7 +2,7 @@
 
 # Build Vars
 IMAGENAME=johnlin/bpfshoot
-VERSION=0.0.1
+VERSION?=0.0.1
 
 # Get the latest git tag or use VERSION if no tags exist
 GIT_TAG := $(shell git describe --tags --exact-match 2>/dev/null || echo "v$(VERSION)")

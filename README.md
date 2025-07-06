@@ -115,6 +115,19 @@ make build-all
 make all
 ```
 
+## Release Process
+
+```bash
+# Create and push release tag with version
+make release VERSION=0.0.2
+
+# Or manually:
+# 1. git tag -a v0.0.2 -m "Release v0.0.2"
+# 2. git push origin v0.0.2
+```
+
+GitHub Actions will automatically build and push both variants (`latest` and `latest-bcc`) to Docker Hub when tags are pushed.
+
 ## Requirements
 
 - **Linux Kernel**:
