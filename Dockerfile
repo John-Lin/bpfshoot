@@ -29,7 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN git clone --recurse-submodules --branch v0.35.0 --depth 1 https://github.com/iovisor/bcc.git \
     && cd bcc/libbpf-tools \
-    && make
+    && make \
+    && make install 
 
 # Setting User and Home
 USER root
