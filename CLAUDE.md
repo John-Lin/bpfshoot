@@ -54,12 +54,17 @@ make build-all
 
 # Build and push to registry
 make all
+
+# Create and push a release tag
+make release VERSION=0.0.2
 ```
 
 ### Running the Container
 ```bash
 # libbpf CO-RE version (modern kernels 5.15+)
-docker run -it --rm --privileged --pid=host --name bpfshoot johnlin/bpfshoot:latest
+docker run -it --rm --privileged --pid=host --name bpfshoot \
+  -v /sys/kernel/debug:/sys/kernel/debug \
+  johnlin/bpfshoot:latest
 
 # BCC version (older kernels 4.1+)
 docker run -it --rm --privileged --pid=host --name bpfshoot \
@@ -108,5 +113,23 @@ Required secrets in GitHub repository:
 - libbpf CO-RE version: tools pre-compiled and installed system-wide (also available in `/bcc/libbpf-tools/`)
 - BCC version: tools available system-wide with `-bpfcc` suffix
 - Container hostnames: `bpfshoot` (CO-RE) and `bcc-tools` (BCC)
-- Current version is defined in Makefile as VERSION=0.0.1
+- Current version is defined in Makefile as VERSION=0.0.1 (overridable with make command)
 - Workflow builds both variants automatically on Dockerfile changes
+
+## Local Development Environment
+
+For local development and testing, the project includes a Lima VM configuration (`linux-vm.yaml`) that provides:
+- Docker support with BPF development tools
+- Pre-installed BCC tools and dependencies
+- Configured kernel headers and build environment
+
+### Setting up Lima VM
+```bash
+# For ARM64 (Apple Silicon)
+limactl start --arch aarch64 --name linux-vm linux-vm.yaml
+
+# For x86_64 (Intel/AMD)
+limactl start --arch x86_64 --name linux-vm-x86 linux-vm.yaml
+```
+
+The Lima VM includes all necessary BPF development tools and can be used for testing container functionality on macOS.

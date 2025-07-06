@@ -1,0 +1,32 @@
+minimumLimaVersion: 1.1.0
+
+# For install x86_64 architecture on Apple Silicon, you need to install additional guest agents.
+# brew install lima-additional-guestagents
+
+# limactl start --arch x86_64 --name linux-vm-x86 linux-vm.yaml
+# limactl start --arch aarch64 --name linux-vm linux-vm.yaml
+base:
+- template://docker
+
+cpus: 4
+memory: "10GiB"
+
+mounts:
+- location: "~"
+  writable: true
+- location: "/tmp/lima"
+  writable: true
+
+provision:
+- mode: system
+  script: |
+    #!/bin/bash
+    set -eux -o pipefail
+    # this setup is from Learning eBPF book by Liz Rice
+    apt-get update
+
+    apt-get install -y apt-transport-https ca-certificates curl clang llvm jq net-tools
+    apt-get install -y libelf-dev libpcap-dev libbfd-dev binutils-dev build-essential make
+    apt-get install -y linux-tools-common linux-tools-$(uname -r)
+    apt-get install -y bpfcc-tools
+    apt-get install -y python3-pip

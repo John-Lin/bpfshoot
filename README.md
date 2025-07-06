@@ -23,7 +23,10 @@
 
 ```bash
 # For modern Linux kernels (5.15+) - libbpf CO-RE version
-docker run -it --rm --privileged --pid=host --name bpfshoot johnlin/bpfshoot:latest
+# Note: libbpf-tools optionally requires debugfs. It has to be mounted in /sys/kernel/debug
+docker run -it --rm --privileged --pid=host --name bpfshoot \
+  -v /sys/kernel/debug:/sys/kernel/debug \
+  johnlin/bpfshoot:latest
 
 # For older Linux kernels (4.1+) - BCC version
 docker run -it --rm --privileged --pid=host --name bpfshoot \
@@ -51,6 +54,14 @@ spec:
     tty: true
     securityContext:
       privileged: true
+    volumeMounts:
+    - name: sys-kernel-debug
+      mountPath: /sys/kernel/debug
+  volumes:
+  - name: sys-kernel-debug
+    hostPath:
+      path: /sys/kernel/debug
+      # Note: libbpf-tools optionally requires debugfs. It has to be mounted in /sys/kernel/debug
 ```
 
 #### BCC version (for older kernels 4.1+)
@@ -134,6 +145,20 @@ GitHub Actions will automatically build and push both variants (`latest` and `la
   - 5.15+ with BPF support (for libbpf CO-RE version)
   - 4.1+ with BPF support (for BCC version with `-bcc` tag)
 - **Privileged Access**: Required for BPF program loading
+
+## macOS Users (M-series chips)
+
+For macOS users with M-series chips, you can use Lima VM to run Linux containers with BPF support:
+
+```bash
+# Install Lima (if not already installed)
+brew install lima
+
+# Start the pre-configured Linux VM
+limactl start --arch aarch64 --name linux-vm lima/linux-vm.yaml
+```
+
+See [lima/README.md](lima/README.md) for detailed setup instructions.
 
 ## Acknowledgments
 
