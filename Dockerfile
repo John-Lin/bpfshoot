@@ -31,7 +31,7 @@ RUN git clone --recurse-submodules --branch v0.35.0 --depth 1 https://github.com
 # Setting User and Home
 USER root
 WORKDIR /root
-ENV HOSTNAME=bptshoot
+ENV HOSTNAME=bpfshoot
 
 # Running bash
 CMD ["bash"]

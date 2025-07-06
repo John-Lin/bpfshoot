@@ -76,6 +76,7 @@ Required secrets in GitHub repository:
 
 - All BPF programs require privileged container execution (`--privileged` flag)
 - The environment is designed for defensive security analysis and system monitoring
-- BCC tools are pre-compiled and ready to use in `/bcc/libbpf-tools/`
-- Container hostname is set to `bptshoot` for identification
+- BCC tools are pre-compiled and installed system-wide (also available in `/bcc/libbpf-tools/`)
+- Container hostname is set to `bpfshoot` for identification
 - Uses CO-RE technology for kernel portability across different Linux distributions
+- Current version is defined in Makefile as VERSION=0.0.1
