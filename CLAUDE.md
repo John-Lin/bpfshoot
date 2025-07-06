@@ -4,25 +4,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-bpfshoot is a containerized BPF (Berkeley Packet Filter) troubleshooting toolkit built on Debian Bookworm. It provides pre-built BPF tools for system observability, performance analysis, and network troubleshooting using libbpf CO-RE (Compile Once - Run Everywhere) technology.
+bpfshoot is a containerized BPF (Berkeley Packet Filter) troubleshooting toolkit that provides pre-built BPF tools for system observability, performance analysis, and network troubleshooting. It supports two variants:
+
+1. **libbpf CO-RE version** (Dockerfile): Built on Debian Bookworm, uses libbpf CO-RE technology for kernel portability
+2. **BCC version** (Dockerfile.bcc): Built on Debian Trixie, uses traditional BCC tools for older kernel compatibility
 
 ## Architecture
 
 The project consists of:
-- **Dockerfile**: Container build that installs BCC (BPF Compiler Collection) v0.35.0 and builds libbpf-tools
+- **Dockerfile**: libbpf CO-RE version - builds BCC v0.35.0 libbpf-tools from source on Debian Bookworm
+- **Dockerfile.bcc**: BCC version - installs pre-packaged BCC tools on Debian Trixie
 - **Makefile**: Build automation supporting multi-architecture Docker builds (x86_64, ARM64)
 - **GitHub Actions**: Automated CI/CD pipeline for multi-arch builds and Docker Hub publishing
 
-The container includes:
-- BCC libbpf-tools (pre-built from source)
-- Complete BPF development toolchain (clang, llvm, libelf-dev)
+Both containers include:
 - Network diagnostic tools (iproute2, net-tools)
-- System monitoring tools (linux-perf)
+- System utilities (procps, vim, git, jq)
+- Complete BPF toolchain (libbpf CO-RE version includes clang, llvm, libelf-dev)
 
 ## Key Technical Details
 
+**libbpf CO-RE version** (`johnlin/bpfshoot:latest`):
 - Uses libbpf CO-RE technology - no kernel headers or debug filesystem mounts required
 - Requires Linux kernel 5.15+ with BPF support
+- Tools located in `/bcc/libbpf-tools/` and installed system-wide
+
+**BCC version** (`johnlin/bpfshoot:latest-bcc`):
+- Uses traditional BCC tools from Debian packages
+- Requires Linux kernel 4.1+ with BPF support
+- Needs kernel headers mounted: `-v /lib/modules:/lib/modules:ro -v /sys:/sys:ro -v /usr/src:/usr/src:ro`
+- Tools available system-wide via bpfcc-tools package
+
+Both versions:
 - Must run with `--privileged` flag for BPF program loading
 - Repository: `johnlin/bpfshoot` on Docker Hub
 
@@ -45,28 +58,43 @@ make all
 
 ### Running the Container
 ```bash
-# Run interactively with privileged access (required for BPF)
-docker run -it --rm --privileged --name bpfshoot johnlin/bpfshoot:latest
+# libbpf CO-RE version (modern kernels 5.15+)
+docker run -it --rm --privileged --pid=host --name bpfshoot johnlin/bpfshoot:latest
+
+# BCC version (older kernels 4.1+)
+docker run -it --rm --privileged --pid=host --name bpfshoot \
+  -v /lib/modules:/lib/modules:ro \
+  -v /sys:/sys:ro \
+  -v /usr/src:/usr/src:ro \
+  johnlin/bpfshoot:latest-bcc
 ```
 
 ### Inside the Container
 ```bash
-# Navigate to BCC tools
-cd /bcc/libbpf-tools
+# libbpf CO-RE version - tools available system-wide or in /bcc/libbpf-tools/
+opensnoop      # Trace file opens
+execsnoop      # Trace process execution  
+tcpconnect     # Trace TCP connections
 
-# Run BPF programs (examples)
-./opensnoop    # Trace file opens
-./execsnoop    # Trace process execution
-./tcpconnect   # Trace TCP connections
+# BCC version - tools available system-wide
+opensnoop-bpfcc    # Trace file opens
+execsnoop-bpfcc    # Trace process execution
+tcpconnect-bpfcc   # Trace TCP connections
 ```
 
 ## GitHub Actions CI/CD
 
 The repository includes automated workflows that:
+- Build both Dockerfile variants (libbpf CO-RE and BCC) 
 - Build multi-architecture Docker images (linux/amd64, linux/arm64)
-- Automatically tag images based on branch, PR, semver, and SHA
+- Automatically tag images with appropriate suffixes (`latest` and `latest-bcc`)
 - Push to Docker Hub on main branch commits and tags
 - Generate build attestations for security
+
+Image tagging strategy:
+- `johnlin/bpfshoot:latest` - libbpf CO-RE version from Dockerfile
+- `johnlin/bpfshoot:latest-bcc` - BCC version from Dockerfile.bcc
+- Additional tags for branches, PRs, semver, and SHA
 
 Required secrets in GitHub repository:
 - `DOCKER_USERNAME`: johnlin
@@ -75,8 +103,10 @@ Required secrets in GitHub repository:
 ## Development Notes
 
 - All BPF programs require privileged container execution (`--privileged` flag)
+- Use `--pid=host` for system-wide process monitoring (required for most BPF tools)
 - The environment is designed for defensive security analysis and system monitoring
-- BCC tools are pre-compiled and installed system-wide (also available in `/bcc/libbpf-tools/`)
-- Container hostname is set to `bpfshoot` for identification
-- Uses CO-RE technology for kernel portability across different Linux distributions
+- libbpf CO-RE version: tools pre-compiled and installed system-wide (also available in `/bcc/libbpf-tools/`)
+- BCC version: tools available system-wide with `-bpfcc` suffix
+- Container hostnames: `bpfshoot` (CO-RE) and `bcc-tools` (BCC)
 - Current version is defined in Makefile as VERSION=0.0.1
+- Workflow builds both variants automatically on Dockerfile changes
