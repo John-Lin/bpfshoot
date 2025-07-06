@@ -1,7 +1,5 @@
 FROM debian:bookworm
 
-RUN echo deb http://cloudfront.debian.net/debian sid main >> /etc/apt/sources.list
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     curl \
